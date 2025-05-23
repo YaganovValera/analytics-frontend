@@ -4,6 +4,9 @@ import RegisterPage from '@pages/RegisterPage';
 import MePage from '@pages/MePage';
 import PrivateRoute from '@routes/PrivateRoute';
 import { useAuth } from '@context/AuthContext';
+import Header from '@components/Header';
+import CandlesPage from '@pages/CandlesPage';
+
 
 function App() {
   const { initialized } = useAuth();
@@ -11,16 +14,24 @@ function App() {
   if (!initialized) return <p>Загрузка авторизации...</p>;
 
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/me" element={
-        <PrivateRoute>
-          <MePage />
-        </PrivateRoute>
-      } />
-      <Route path="/" element={<Navigate to="/login" replace />} />
-    </Routes>
+    <>
+      <Header />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/me" element={
+          <PrivateRoute>
+            <MePage />
+          </PrivateRoute>
+        } />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/candles" element={
+          <PrivateRoute>
+            <CandlesPage />
+          </PrivateRoute>
+        } />
+      </Routes>
+    </>
   );
 }
 

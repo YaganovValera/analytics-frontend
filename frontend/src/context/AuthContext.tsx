@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import api, { setAccessToken } from '@api/axios';
+import { clearAccessToken } from '@api/axios';
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -18,42 +19,45 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthContextType['user']>(null);
-  const [initialized, setInitialized] = useState(false);
+    const [user, setUser] = useState<AuthContextType['user']>(null);
+    const [initialized, setInitialized] = useState(false);
 
-  useEffect(() => {
+    useEffect(() => {
     const init = async () => {
-      const refreshToken = localStorage.getItem('refresh_token');
-      if (!refreshToken) {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken) {
         setInitialized(true);
         return;
-      }
+        }
 
-      try {
+        try {
         const res = await api.post('/refresh', { refresh_token: refreshToken });
         localStorage.setItem('refresh_token', res.data.refresh_token);
         setAccessToken(res.data.access_token);
 
         const userRes = await api.get('/me');
         setUser({
-          user_id: userRes.data.user_id,
-          roles: userRes.data.roles,
+            user_id: userRes.data.user_id,
+            roles: userRes.data.roles,
         });
-      } catch {
+        } catch {
         localStorage.removeItem('refresh_token');
         setUser(null);
-      } finally {
+        } finally {
         setInitialized(true); // ✅ теперь явно говорим: init завершён
-      }
+        }
     };
 
     init();
-  }, []);
+    }, []);
 
-  const logout = () => {
+
+    const logout = () => {
+    clearAccessToken(); // ⬅️ очищает access_token и заголовок
     localStorage.removeItem('refresh_token');
     window.location.href = '/login';
-  };
+    };
+
 
   return (
     <AuthContext.Provider

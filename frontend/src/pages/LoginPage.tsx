@@ -12,7 +12,7 @@ function LoginPage() {
     localStorage.setItem('refresh_token', res.data.refresh_token);
     setAccessToken(res.data.access_token);
 
-    // ⬇️ Подтягиваем user из /me
+    //  Подтягиваем user из /me
     const userRes = await api.get('/me');
     setUser({
       user_id: userRes.data.user_id,
