@@ -1,12 +1,15 @@
 // src/pages/CandlesPage.tsx
 import { useEffect, useState } from 'react';
-import { getCandles } from '@api/candles';
-import type { Candle } from '@api/candles';
 import { getSymbols } from '@api/symbols';
+import type { Candle as APICandle } from '@api/candles';
+import CandleChart from '@components/CandleChart';
+import type { Time } from 'lightweight-charts';
+import { exportCandlesToCSV } from '../utils/exportCsv';
+import { useCandlesQuery } from '../hooks/useCandlesQuery';
 
 const intervals = ['1m', '5m', '15m', '1h', '4h', '1d'];
-
-type SortKey = keyof Candle;
+type ViewMode = 'table' | 'chart';
+type SortKey = keyof APICandle;
 type SortDirection = 'asc' | 'desc';
 
 function CandlesPage() {
@@ -15,22 +18,26 @@ function CandlesPage() {
   const [interval, setInterval] = useState('1m');
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
-  const [candles, setCandles] = useState<Candle[]>([]);
-  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
+  const [limit, setLimit] = useState(500);
+  const [viewMode, setViewMode] = useState<ViewMode>('chart');
   const [sortKey, setSortKey] = useState<SortKey>('open_time');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
-  const toRFC3339 = (local: string): string => {
-    const date = new Date(local);
-    return date.toISOString();
+  const renderSortArrow = (key: SortKey) => {
+    if (key !== sortKey) return null;
+    return sortDirection === 'asc' ? '↑' : '↓';
   };
 
-  const formatProtoDate = (ts: { seconds: number }): string => {
-    const ms = ts.seconds * 1000;
-    return new Date(ms).toLocaleString();
-  };
+  const { candles, error, isLoading, hasMore, fetchCandles, fetchMore } = useCandlesQuery({
+    symbol,
+    interval,
+    start: new Date(start).toISOString(),
+    end: new Date(end).toISOString(),
+    limit,
+  });
+
+  const formatProtoDate = (ts: { seconds: number }): string =>
+    new Date(ts.seconds * 1000).toLocaleString();
 
   const toggleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -59,50 +66,21 @@ function CandlesPage() {
   useEffect(() => {
     getSymbols()
       .then(setSymbols)
-      .catch(() => setError('Ошибка загрузки символов'));
+      .catch(() => console.error('Ошибка загрузки символов'));
   }, []);
-
-  const handleFetch = async (isLoadMore = false) => {
-    try {
-      setError(null);
-
-      if (!symbol || !start || !end) {
-        setError('Заполните все поля');
-        return;
-      }
-
-      if (!isLoadMore && new Date(start) >= new Date(end)) {
-        setError('Начало должно быть раньше конца');
-        return;
-      }
-
-      const result = await getCandles({
-        symbol,
-        interval,
-        start: toRFC3339(start),
-        end: toRFC3339(end),
-        page_token: isLoadMore ? nextPageToken ?? undefined : undefined,
-      });
-
-      setCandles((prev) =>
-        isLoadMore ? [...prev, ...result.candles] : result.candles
-      );
-      setNextPageToken(result.next_page_token ?? null);
-    } catch (err) {
-      setError('Ошибка при получении свечей');
-    }
-  };
-
-  const renderSortArrow = (key: SortKey) => {
-    if (key !== sortKey) return null;
-    return sortDirection === 'asc' ? '↑' : '↓';
-  };
 
   return (
     <div className="candles-page">
       <h2>Исторические свечи</h2>
 
-      <form onSubmit={(e) => { e.preventDefault(); handleFetch(false); }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!symbol || !start || !end) return alert('Заполните все поля');
+          if (new Date(start) >= new Date(end)) return alert('Начало должно быть раньше конца');
+          fetchCandles();
+        }}
+      >
         <div>
           <label>Символ: </label>
           <select value={symbol} onChange={(e) => setSymbol(e.target.value)} required>
@@ -128,43 +106,73 @@ function CandlesPage() {
           <input type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} required />
         </div>
 
+        <div>
+          <label>Лимит: </label>
+          <input type="number" min="1" max="1000" value={limit} onChange={(e) => setLimit(Number(e.target.value))} />
+        </div>
+
+        <div>
+          <label>Вид: </label>
+          <select value={viewMode} onChange={(e) => setViewMode(e.target.value as ViewMode)}>
+            <option value="chart">График</option>
+            <option value="table">Таблица</option>
+          </select>
+        </div>
+
         <button type="submit">Получить</button>
       </form>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      {isLoading && <p>Загрузка...</p>}
+
+      {candles.length === 0 && !isLoading && <p style={{ color: '#999' }}>Нет данных для отображения.</p>}
 
       {candles.length > 0 && (
         <>
-          <table>
-            <thead>
-              <tr>
-                <th onClick={() => toggleSort('open_time')}>Время открытия {renderSortArrow('open_time')}</th>
-                <th onClick={() => toggleSort('close_time')}>Время закрытия {renderSortArrow('close_time')}</th>
-                <th onClick={() => toggleSort('open')}>Open {renderSortArrow('open')}</th>
-                <th onClick={() => toggleSort('high')}>High {renderSortArrow('high')}</th>
-                <th onClick={() => toggleSort('low')}>Low {renderSortArrow('low')}</th>
-                <th onClick={() => toggleSort('close')}>Close {renderSortArrow('close')}</th>
-                <th onClick={() => toggleSort('volume')}>Volume {renderSortArrow('volume')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedCandles.map((c, idx) => (
-                <tr key={idx}>
-                  <td>{formatProtoDate(c.open_time)}</td>
-                  <td>{formatProtoDate(c.close_time)}</td>
-                  <td>{c.open}</td>
-                  <td>{c.high}</td>
-                  <td>{c.low}</td>
-                  <td>{c.close}</td>
-                  <td>{c.volume}</td>
+          {viewMode === 'chart' ? (
+            <CandleChart candles={candles.map(c => ({
+              time: c.open_time.seconds as Time,
+              open: c.open,
+              high: c.high,
+              low: c.low,
+              close: c.close,
+            }))} />
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th onClick={() => toggleSort('open_time')}>Время открытия {renderSortArrow('open_time')}</th>
+                  <th onClick={() => toggleSort('close_time')}>Время закрытия {renderSortArrow('close_time')}</th>
+                  <th onClick={() => toggleSort('open')}>Open {renderSortArrow('open')}</th>
+                  <th onClick={() => toggleSort('high')}>High {renderSortArrow('high')}</th>
+                  <th onClick={() => toggleSort('low')}>Low {renderSortArrow('low')}</th>
+                  <th onClick={() => toggleSort('close')}>Close {renderSortArrow('close')}</th>
+                  <th onClick={() => toggleSort('volume')}>Volume {renderSortArrow('volume')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {nextPageToken && (
-            <button onClick={() => handleFetch(true)}>Загрузить ещё</button>
+              </thead>
+              <tbody>
+                {sortedCandles.map((c, idx) => (
+                  <tr key={idx}>
+                    <td>{formatProtoDate(c.open_time)}</td>
+                    <td>{formatProtoDate(c.close_time)}</td>
+                    <td>{c.open}</td>
+                    <td>{c.high}</td>
+                    <td>{c.low}</td>
+                    <td>{c.close}</td>
+                    <td>{c.volume}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
+
+          {hasMore && (
+            <button onClick={fetchMore}>Загрузить ещё</button>
+          )}
+
+          <button onClick={() => exportCandlesToCSV(symbol, candles)}>
+            Экспорт в CSV
+          </button>
         </>
       )}
     </div>

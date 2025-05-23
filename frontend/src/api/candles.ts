@@ -1,7 +1,6 @@
 // src/api/candles.ts
 import api from './axios';
 
-// src/api/candles.ts
 export type ProtobufTimestamp = { seconds: number };
 
 export type Candle = {
@@ -15,22 +14,21 @@ export type Candle = {
   volume: number;
 };
 
-
-// src/api/candles.ts
 export type GetCandlesParams = {
-    symbol: string;
-    interval: string;
-    start: string;
-    end: string;
-    page_token?: string;
-  };
-  
+  symbol: string;
+  interval: string;
+  start: string;
+  end: string;
+  page_token?: string;
+  page_size?: number;
+};
+
 export type GetCandlesResponse = {
-candles: Candle[];
-next_page_token?: string;
+  candles: Candle[];
+  next_page_token?: string;
 };
 
 export async function getCandles(params: GetCandlesParams): Promise<GetCandlesResponse> {
-const res = await api.get<GetCandlesResponse>('/candles', { params });
-return res.data;
+  const res = await api.get<GetCandlesResponse>('/candles', { params });
+  return res.data;
 }
