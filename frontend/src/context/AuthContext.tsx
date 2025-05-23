@@ -3,50 +3,50 @@ import api, { setAccessToken } from '@api/axios';
 
 type AuthContextType = {
   isAuthenticated: boolean;
-  loading: boolean;
+  initialized: boolean;
   user: { user_id: string; roles: string[] } | null;
   logout: () => void;
+  setUser: (user: AuthContextType['user']) => void;
 };
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
-  loading: true,
+  initialized: false,
   user: null,
   logout: () => {},
+  setUser: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthContextType['user']>(null);
-  const [loading, setLoading] = useState(true);
-
-  const refresh = async () => {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) return;
-
-    try {
-      const res = await api.post('/refresh', { refresh_token: refreshToken });
-      setAccessToken(res.data.access_token);
-    } catch {
-      localStorage.removeItem('refresh_token');
-    }
-  };
-
-  const fetchUser = async () => {
-    try {
-      const res = await api.get('/me');
-      setUser({ user_id: res.data.user_id, roles: res.data.roles });
-    } catch {
-      setUser(null);
-    }
-  };
-
-  const init = async () => {
-    await refresh();
-    await fetchUser();
-    setLoading(false);
-  };
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    const init = async () => {
+      const refreshToken = localStorage.getItem('refresh_token');
+      if (!refreshToken) {
+        setInitialized(true);
+        return;
+      }
+
+      try {
+        const res = await api.post('/refresh', { refresh_token: refreshToken });
+        localStorage.setItem('refresh_token', res.data.refresh_token);
+        setAccessToken(res.data.access_token);
+
+        const userRes = await api.get('/me');
+        setUser({
+          user_id: userRes.data.user_id,
+          roles: userRes.data.roles,
+        });
+      } catch {
+        localStorage.removeItem('refresh_token');
+        setUser(null);
+      } finally {
+        setInitialized(true); // ✅ теперь явно говорим: init завершён
+      }
+    };
+
     init();
   }, []);
 
@@ -59,9 +59,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         isAuthenticated: !!user,
-        loading,
+        initialized,
         user,
         logout,
+        setUser,
       }}
     >
       {children}

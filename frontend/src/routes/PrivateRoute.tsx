@@ -7,14 +7,10 @@ type PrivateRouteProps = {
 };
 
 function PrivateRoute({ children }: PrivateRouteProps) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, initialized } = useAuth();
 
-  if (loading) return <p>Загрузка...</p>;
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
+  if (!initialized) return <p>Загрузка...</p>;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 }
 
