@@ -1,38 +1,18 @@
-import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api, { setAccessToken } from '@api/axios';
+import AuthForm from '@components/AuthForm';
 
 function RegisterPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert(`Регистрация: ${username}, ${password}`);
+  const handleRegister = async (username: string, password: string) => {
+    const res = await api.post('/register', { username, password });
+    localStorage.setItem('refresh_token', res.data.refresh_token);
+    setAccessToken(res.data.access_token);
+    navigate('/me');
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <h2>Регистрация</h2>
-      <div>
-        <label>Логин:</label>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>Пароль:</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-      <button type="submit">Зарегистрироваться</button>
-    </form>
-  );
+  return <AuthForm mode="register" onSubmit={handleRegister} />;
 }
 
 export default RegisterPage;

@@ -1,38 +1,18 @@
-import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api, { setAccessToken } from '@api/axios';
+import AuthForm from '@components/AuthForm';
 
 function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert(`Username: ${username}, Password: ${password}`);
+  const handleLogin = async (username: string, password: string) => {
+    const res = await api.post('/login', { username, password });
+    localStorage.setItem('refresh_token', res.data.refresh_token);
+    setAccessToken(res.data.access_token);
+    navigate('/me');
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <h2>Вход в систему</h2>
-      <div>
-        <label>Логин:</label>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>Пароль:</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-      <button type="submit">Войти</button>
-    </form>
-  );
+  return <AuthForm mode="login" onSubmit={handleLogin} />;
 }
 
 export default LoginPage;

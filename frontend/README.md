@@ -1,54 +1,88 @@
-# React + TypeScript + Vite
+# Frontend — Crypto Analytics System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📌 Назначение
 
-Currently, two official plugins are available:
+Этот фронтенд — клиентская часть распределённой системы для анализа криптовалютных данных. Поддерживает:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+* Авторизацию пользователей
+* Регистрацию
+* Защищённые маршруты
+* Админ-функции
+* Получение и отображение рыночных метрик через API Gateway
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## ⚙️ Стек технологий
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+* **React** 18 + **TypeScript**
+* **Vite** (вместо CRA)
+* **React Router v6**
+* **Axios** (c интерцепторами)
+* **CSS** (без Tailwind — классический стиль)
+
+---
+
+## 🧱 Структура проекта
+
+```
+src/
+├── api/           # Axios-инстанс и настройки авторизации
+├── components/    # Переиспользуемые UI-компоненты
+├── context/       # React context (AuthContext и пр.)
+├── pages/         # Страницы (Login, Register, Me, Admin)
+├── routes/        # Роутинг и защита маршрутов
+├── utils/         # Валидация, форматтеры, хелперы
+├── App.tsx        # Корневой компонент
+├── main.tsx       # Точка входа приложения
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🔐 Auth flow
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+1. Пользователь логинится через `/v1/login` или регистрируется через `/v1/register`
+2. `access_token` сохраняется в **оперативной памяти** (не в localStorage)
+3. `refresh_token` сохраняется в **localStorage**
+4. При `401` ошибка автоматически перехватывается и отправляется `/v1/refresh`
+5. После обновления токена — повтор запроса
+
+---
+
+## 🛡 Валидация форм (frontend-only)
+
+### Username:
+
+* От 3 до 64 символов
+* Только латиница, цифры и `_`
+* Нельзя начинать или заканчивать с `_`
+* Никаких пробелов
+
+### Password:
+
+* От 8 до 128 символов
+* Минимум одна буква и одна цифра
+* Никаких пробелов
+
+Все ошибки отображаются прямо в форме, без обращения к backend
+
+---
+
+## ✅ Базовые маршруты
+
+| Путь        | Доступ       | Назначение  |
+| ----------- | ------------ | ----------- |
+| `/login`    | Публичный    | Вход        |
+| `/register` | Публичный    | Регистрация |
+| `/me`       | Приватный    | Профиль     |
+| `/admin`    | Только admin | Управление  |
+
+---
+
+## 🧪 Как запустить
+
+```bash
+npm install
+npm run dev
 ```
+
+Фронт запускается на `http://localhost:5173`, общается с backend через `http://localhost:8080/v1`
