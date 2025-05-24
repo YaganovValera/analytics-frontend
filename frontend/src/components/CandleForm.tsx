@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchSymbols } from '@api/candles';
 import type { Interval } from '../types/candle';
+import './CandleForm.css';
 
 interface CandleFormProps {
   onSubmit: (params: {
@@ -48,42 +49,64 @@ function CandleForm({ onSubmit, loading }: CandleFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>Загрузка свечей</h3>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <form onSubmit={handleSubmit} className="candle-form">
+      <h3>Фильтрация данных</h3>
+      {error && <div className="form-error">{error}</div>}
 
-      <label>
-        Символ:
-        <select value={symbol} onChange={(e) => setSymbol(e.target.value)} required>
+      <div className="form-group">
+        <label className="form-label">Символ:</label>
+        <select
+          className="form-select"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value)}
+          required
+        >
           <option value="">-- выберите --</option>
           {symbols.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-      </label>
+      </div>
 
-      <label>
-        Интервал:
-        <select value={interval} onChange={(e) => setInterval(e.target.value as Interval)}>
+      <div className="form-group">
+        <label className="form-label">Интервал:</label>
+        <select
+          className="form-select"
+          value={interval}
+          onChange={(e) => setInterval(e.target.value as Interval)}
+        >
           {intervals.map((intv) => (
             <option key={intv} value={intv}>{intv}</option>
           ))}
         </select>
-      </label>
+      </div>
 
-      <label>
-        Начало:
-        <input type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} required />
-      </label>
-
-      <label>
-        Конец:
-        <input type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} required />
-      </label>
-
-      <label>
-        Количество свечей (1-2000):
+      <div className="form-group">
+        <label className="form-label">Начало:</label>
         <input
+          className="form-input"
+          type="datetime-local"
+          value={start}
+          onChange={(e) => setStart(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Конец:</label>
+        <input
+          className="form-input"
+          type="datetime-local"
+          value={end}
+          onChange={(e) => setEnd(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Количество свечей (1–2000):</label>
+        <input
+          className="form-input"
           type="number"
           value={total}
           onChange={(e) => setTotal(parseInt(e.target.value))}
@@ -91,9 +114,11 @@ function CandleForm({ onSubmit, loading }: CandleFormProps) {
           max={2000}
           required
         />
-      </label>
+      </div>
 
-      <button type="submit" disabled={loading}>Загрузить</button>
+      <button type="submit" disabled={loading}>
+        Загрузить
+      </button>
     </form>
   );
 }

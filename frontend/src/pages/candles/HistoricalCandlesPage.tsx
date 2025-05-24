@@ -89,6 +89,29 @@ function HistoricalCandlesPage() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!candles.length || !query) return;
+    const header = 'open_time,close_time,open,high,low,close,volume';
+    const rows = candles.map((c) => [
+      new Date(c.open_time.seconds * 1000).toISOString(),
+      new Date(c.close_time.seconds * 1000).toISOString(),
+      c.open,
+      c.high,
+      c.low,
+      c.close,
+      c.volume,
+    ].join(','));
+    const content = [header, ...rows].join('\n');
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `candles_${query.symbol}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const stats = useMemo(() => {
     if (candles.length === 0) return null;
     const closeAvg = candles.reduce((sum, c) => sum + c.close, 0) / candles.length;
@@ -128,6 +151,12 @@ function HistoricalCandlesPage() {
               <span>{stats.volatility.toFixed(2)}</span>
             </div>
           </div>
+        </div>
+      )}
+
+      {candles.length > 0 && (
+        <div style={{ margin: '1rem 0' }}>
+          <button onClick={handleExportCSV}>Скачать CSV</button>
         </div>
       )}
 
