@@ -52,11 +52,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
 
-    const logout = () => {
-    clearAccessToken(); // ⬅️ очищает access_token и заголовок
-    localStorage.removeItem('refresh_token');
-    window.location.href = '/login';
+    const logout = async () => {
+      try {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          await api.post('/logout', { refresh_token: refreshToken });
+        }
+      } catch (err) {
+        console.warn('Logout API failed (ignored)', err);
+      } finally {
+        clearAccessToken();
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/login';
+      }
     };
+    
 
 
   return (

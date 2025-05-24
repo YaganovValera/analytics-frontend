@@ -1,34 +1,38 @@
 // src/api/candles.ts
+
 import api from './axios';
+import type { CandleResponse, Interval } from '../types/candle';
 
-export type ProtobufTimestamp = { seconds: number };
+// Получение списка символов
+export const fetchSymbols = async (): Promise<string[]> => {
+  const res = await api.get<{ symbols: string[] }>('symbols');
+  return res.data.symbols;
+};
 
-export type Candle = {
-  open_time: ProtobufTimestamp;
-  close_time: ProtobufTimestamp;
+interface FetchCandlesParams {
   symbol: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-};
-
-export type GetCandlesParams = {
-  symbol: string;
-  interval: string;
-  start: string;
-  end: string;
-  page_token?: string;
-  page_size?: number;
-};
-
-export type GetCandlesResponse = {
-  candles: Candle[];
-  next_page_token?: string;
-};
-
-export async function getCandles(params: GetCandlesParams): Promise<GetCandlesResponse> {
-  const res = await api.get<GetCandlesResponse>('/candles', { params });
-  return res.data;
+  interval: Interval;
+  start: string; // ISO8601
+  end: string;   // ISO8601
+  pageSize?: number;
+  pageToken?: string;
 }
+
+// Получение свечей с пагинацией
+export const fetchCandles = async (params: FetchCandlesParams): Promise<CandleResponse> => {
+  const { symbol, interval, start, end, pageSize = 500, pageToken } = params;
+  const res = await api.get<CandleResponse>('candles', {
+    params: {
+      symbol,
+      interval,
+      start,
+      end,
+      page_size: pageSize,
+      page_token: pageToken,
+    },
+  });
+  return {
+    candles: res.data.candles ?? [],
+    next_page_token: res.data.next_page_token,
+  };
+};

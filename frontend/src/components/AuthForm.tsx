@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 type AuthFormProps = {
   mode: 'login' | 'register';
@@ -42,16 +43,27 @@ function AuthForm({ mode, onSubmit }: AuthFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const uErr = validateUsername(username);
     const pErr = validatePassword(password);
-
     if (uErr) return setError(uErr);
     if (pErr) return setError(pErr);
 
     try {
       await onSubmit(username.trim(), password);
-    } catch (err) {
-      setError(mode === 'login' ? 'Ошибка входа: неверные данные' : 'Ошибка регистрации: пользователь уже существует');
+    } catch (err: any) {
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
+        if (mode === 'login') {
+          if (status === 401) setError('Неверный логин или пароль.');
+          else setError(`Ошибка входа: ${status}`);
+        } else {
+          if (status === 409) setError('Пользователь уже существует.');
+          else setError(`Ошибка регистрации: ${status}`);
+        }
+      } else {
+        setError('Неизвестная ошибка');
+      }
     }
   };
 

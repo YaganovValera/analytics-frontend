@@ -3,7 +3,7 @@ import { useAuth } from '@context/AuthContext';
 
 function Header() {
   const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   if (!isAuthenticated) return null;
 
@@ -18,7 +18,7 @@ function Header() {
         {user?.roles.includes('admin') && (
           <Link to="/admin" style={styles.link}>Админка</Link>
         )}
-        <Link to="/candles">Аналитика</Link>
+        <Link to="/candles/historical">Аналитика</Link>
       </nav>
       <div style={styles.user}>
         <span style={{ marginRight: '1rem' }}>

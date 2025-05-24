@@ -5,8 +5,7 @@ import MePage from '@pages/MePage';
 import PrivateRoute from '@routes/PrivateRoute';
 import { useAuth } from '@context/AuthContext';
 import Header from '@components/Header';
-import CandlesPage from '@pages/CandlesPage';
-
+import HistoricalCandlesPage from '@pages/candles/HistoricalCandlesPage';
 
 function App() {
   const { initialized } = useAuth();
@@ -19,17 +18,23 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/me" element={
-          <PrivateRoute>
-            <MePage />
-          </PrivateRoute>
-        } />
+        <Route
+          path="/me"
+          element={
+            <PrivateRoute>
+              <MePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/candles/historical"
+          element={
+            <PrivateRoute>
+              <HistoricalCandlesPage />
+            </PrivateRoute>
+          }
+        />
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/candles" element={
-          <PrivateRoute>
-            <CandlesPage />
-          </PrivateRoute>
-        } />
       </Routes>
     </>
   );
