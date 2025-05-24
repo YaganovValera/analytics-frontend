@@ -24,6 +24,9 @@ function CandleTable({ candles, visibleCount }: CandleTableProps) {
   const [sortKey, setSortKey] = useState<string>('open_time');
   const [sortAsc, setSortAsc] = useState<boolean>(true);
 
+  const maxHigh = useMemo(() => Math.max(...candles.map(c => c.high)), [candles]);
+  const minLow = useMemo(() => Math.min(...candles.map(c => c.low)), [candles]);
+
   const sorted = useMemo(() => {
     const copy = [...candles];
     copy.sort((a, b) => {
@@ -71,8 +74,12 @@ function CandleTable({ candles, visibleCount }: CandleTableProps) {
         </thead>
         <tbody>
           {visible.map((candle, idx) => {
-            const rowClass =
+            let rowClass =
               candle.close > candle.open ? 'row-up' : candle.close < candle.open ? 'row-down' : 'row-neutral';
+
+            if (candle.high === maxHigh) rowClass += ' row-max';
+            if (candle.low === minLow) rowClass += ' row-min';
+
             return (
               <tr key={`${candle.symbol}-${candle.open_time.seconds}-${idx}`} className={rowClass}>
                 <td>{idx + 1}</td>
@@ -91,5 +98,6 @@ function CandleTable({ candles, visibleCount }: CandleTableProps) {
     </div>
   );
 }
+
 
 export default CandleTable;
