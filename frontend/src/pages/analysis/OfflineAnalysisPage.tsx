@@ -1,3 +1,4 @@
+// src/pages/OfflineAnalysisPage.tsx
 import { useState } from 'react';
 import CsvUploader from '@components/CsvUploader';
 import type { CSVParsedCandle, Candle } from '../../types/candle';
@@ -34,6 +35,17 @@ function OfflineAnalysisPage() {
     volume: c.volume,
   });
 
+  const parseServerCandle = (c: any): Candle => ({
+    symbol: c.symbol,
+    open_time: { seconds: Math.floor(new Date(c.open_time).getTime() / 1000) },
+    close_time: { seconds: Math.floor(new Date(c.close_time).getTime() / 1000) },
+    open: c.open,
+    high: c.high,
+    low: c.low,
+    close: c.close,
+    volume: c.volume,
+  });
+
   return (
     <div>
       <h2>Анализ загруженного CSV</h2>
@@ -63,13 +75,13 @@ function OfflineAnalysisPage() {
         <div>
           <h3>График свечей</h3>
           <AnalysisChart
-            key={result?.symbol}
+            key={result.symbol}
             candles={candles.map(convertToProtoCandle)}
             highlights={{
               maxGapUp: result.analytics.max_gap_up,
               maxGapDown: result.analytics.max_gap_down,
-              mostVolatileCandle: result.analytics.most_volatile_candle,
-              mostVolumeCandle: result.analytics.most_volume_candle,
+              mostVolatileCandle: parseServerCandle(result.analytics.most_volatile_candle),
+              mostVolumeCandle: parseServerCandle(result.analytics.most_volume_candle),
             }}
           />
         </div>

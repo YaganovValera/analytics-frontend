@@ -3,6 +3,7 @@
 import React from 'react';
 import Papa from 'papaparse';
 import type { CSVParsedCandle } from '../types/candle';
+import './CsvUploader.css';
 
 interface CsvUploaderProps {
     onParsed: (data: CSVParsedCandle[]) => void;
@@ -53,10 +54,10 @@ function CsvUploader({ onParsed, onError }: CsvUploaderProps) {
     };
 
     return (
-        <div style={{ marginBottom: '1rem' }}>
-        <input type="file" accept=".csv" onChange={handleFile} />
+        <div className="csv-uploader">
+          <input type="file" accept=".csv" onChange={handleFile} />
         </div>
-    );
+      );
 }
   
 
