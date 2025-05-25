@@ -6,11 +6,13 @@ import AnalysisChart from '@components/analytics_csv/AnalysisChart';
 
 import type { CSVParsedCandle, Candle } from '../../types/candle';
 import type { AnalyticsResponse } from '../../types/analytics';
+
+import BodyWickInsight from '@components/analytics_csv/BodyWickInsight';
 import MetricCards from '@components/analytics_csv/MetricCards';
 import VolumeByHourHistogram from '@components/analytics_csv/VolumeByHourHistogram';
-import BodyWickLineChart from '@components/analytics_csv/BodyWickLineChart';
 import PieChartUpDown from '@components/analytics_csv/PieChartUpDown';
 
+import './OfflineAnalysisPage.css';
 
 function OfflineAnalysisPage() {
   const [candles, setCandles] = useState<CSVParsedCandle[]>([]);
@@ -103,13 +105,16 @@ function OfflineAnalysisPage() {
           />
 
           <MetricCards analytics={result.analytics} />
-          <VolumeByHourHistogram candles={candles.map(toProtoCandle)} />
-          <PieChartUpDown
-            upRatio={result.analytics.up_ratio}
-            downRatio={result.analytics.down_ratio}
-          />
-          <BodyWickLineChart analytics={result.analytics} />
 
+          <div className="grid-two-cols">
+            <VolumeByHourHistogram candles={candles.map(toProtoCandle)} />
+            <PieChartUpDown
+              upRatio={result.analytics.up_ratio}
+              downRatio={result.analytics.down_ratio}
+            />
+          </div>
+          
+          <BodyWickInsight analytics={result.analytics} />
         </div>
       )}
     </div>
