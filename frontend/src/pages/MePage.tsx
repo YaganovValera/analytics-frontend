@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '@api/axios';
+import './MePage.css';
 
 type UserInfo = {
   user_id: string;
@@ -21,11 +22,11 @@ function MePage() {
   }, []);
 
   if (loading) return <p>Загрузка...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (error) return <p className="error">{error}</p>;
   if (!user) return null;
 
   return (
-    <div>
+    <div className="profile-container">
       <h2>Профиль</h2>
       <p><strong>ID:</strong> {user.user_id}</p>
       <p><strong>Роли:</strong> {user.roles.join(', ')}</p>

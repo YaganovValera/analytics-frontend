@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './AuthForm.css';
+import { Link } from 'react-router-dom';
 
 type AuthFormProps = {
   mode: 'login' | 'register';
@@ -68,21 +70,23 @@ function AuthForm({ mode, onSubmit }: AuthFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="auth-form">
       <h2>{mode === 'login' ? 'Вход в систему' : 'Регистрация'}</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <div>
-        <label>Логин:</label>
+      {error && <p className="error">{error}</p>}
+      <div className="form-group">
+        <label htmlFor="username">Логин:</label>
         <input
+          id="username"
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
         />
       </div>
-      <div>
-        <label>Пароль:</label>
+      <div className="form-group">
+        <label htmlFor="password">Пароль:</label>
         <input
+          id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -90,6 +94,19 @@ function AuthForm({ mode, onSubmit }: AuthFormProps) {
         />
       </div>
       <button type="submit">{mode === 'login' ? 'Войти' : 'Зарегистрироваться'}</button>
+
+      <p className="auth-switch">
+        {mode === 'login' ? (
+          <>
+            Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+          </>
+        ) : (
+          <>
+            Уже есть аккаунт? <Link to="/login">Войти</Link>
+          </>
+        )}
+      </p>
+    
     </form>
   );
 }

@@ -1,13 +1,13 @@
-// src/components/AnalysisChart.tsx
-
 import { useEffect, useRef } from 'react';
 import {
   createChart,
   type UTCTimestamp,
   type CandlestickData,
   LineStyle,
+  type IChartApi,
 } from 'lightweight-charts';
 import type { Candle } from '../types/candle';
+import './AnalysisChart.css';
 
 interface AnalysisChartProps {
   candles: Candle[];
@@ -21,35 +21,32 @@ interface AnalysisChartProps {
 
 function AnalysisChart({ candles, highlights }: AnalysisChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstance = useRef<IChartApi | null>(null);
 
   useEffect(() => {
     if (!chartRef.current || candles.length === 0) return;
+
     chartRef.current.innerHTML = '';
 
     const chart = createChart(chartRef.current, {
       width: chartRef.current.clientWidth,
       height: 400,
       layout: {
-        background: { color: '#ffffff' },
-        textColor: '#333',
+        background: { color: '#fff' },
+        textColor: '#111',
       },
       grid: {
         vertLines: { color: '#eee' },
         horzLines: { color: '#eee' },
       },
-      crosshair: {
-        mode: 1,
-      },
-      rightPriceScale: {
-        borderColor: '#ccc',
-      },
-      timeScale: {
-        borderColor: '#ccc',
-        timeVisible: true,
-      },
+      crosshair: { mode: 1 },
+      timeScale: { timeVisible: true, borderColor: '#ccc' },
+      rightPriceScale: { borderColor: '#ccc' },
     });
 
-    const series = chart.addCandlestickSeries();
+    chartInstance.current = chart;
+
+    const candleSeries = chart.addCandlestickSeries();
 
     const chartData: CandlestickData[] = candles.map((c) => ({
       time: (c.open_time.seconds || 0) as UTCTimestamp,
@@ -59,30 +56,72 @@ function AnalysisChart({ candles, highlights }: AnalysisChartProps) {
       close: c.close,
     }));
 
-    series.setData(chartData);
+    candleSeries.setData(chartData);
 
-    // Добавим линии на maxGapUp / maxGapDown
+    // maxGapUp линия
     if (highlights?.maxGapUp) {
-      chart.addLineSeries({
-        color: 'green',
-        lineWidth: 1,
+      const lineUp = chart.addLineSeries({
+        color: '#2e7d32',
         lineStyle: LineStyle.Dashed,
-      }).setData(chartData.map((d) => ({ time: d.time, value: d.open + highlights.maxGapUp! })));
+        lineWidth: 1,
+      });
+      lineUp.setData(
+        chartData.map((d) => ({
+          time: d.time,
+          value: d.open + highlights.maxGapUp!,
+        }))
+      );
     }
 
+    // maxGapDown линия
     if (highlights?.maxGapDown) {
-      chart.addLineSeries({
-        color: 'red',
-        lineWidth: 1,
+      const lineDown = chart.addLineSeries({
+        color: '#c62828',
         lineStyle: LineStyle.Dashed,
-      }).setData(chartData.map((d) => ({ time: d.time, value: d.open - highlights.maxGapDown! })));
+        lineWidth: 1,
+      });
+      lineDown.setData(
+        chartData.map((d) => ({
+          time: d.time,
+          value: d.open - highlights.maxGapDown!,
+        }))
+      );
     }
 
-    // Удаление при размонтировании
     return () => chart.remove();
   }, [candles, highlights]);
 
-  return <div ref={chartRef} style={{ marginBottom: '1rem' }} />;
+  return (
+    <div className="analysis-layout">
+      <div className="chart-container">
+        <p className="chart-description">
+          Вы видите интерактивный свечной график с наложением аналитических уровней. Наведите курсор
+          на свечу для детального анализа.
+        </p>
+        <div ref={chartRef} />
+      </div>
+
+      <div className="chart-legend">
+        <h4>Обозначения</h4>
+        <div className="legend-item">
+          <span className="icon green">🔺</span>
+          <span>Max Gap Up — максимальный скачок вверх после открытия</span>
+        </div>
+        <div className="legend-item">
+          <span className="icon red">🔻</span>
+          <span>Max Gap Down — максимальный провал вниз после открытия</span>
+        </div>
+        <div className="legend-item">
+          <span className="icon purple">🟣</span>
+          <span>Свеча с наибольшим объёмом (всплеск активности)</span>
+        </div>
+        <div className="legend-item">
+          <span className="icon yellow">🟡</span>
+          <span>Самая волатильная свеча — резкое движение рынка</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default AnalysisChart;

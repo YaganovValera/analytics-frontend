@@ -92,8 +92,9 @@ function HistoricalCandlesPage() {
   const handleExportCSV = () => {
     if (!candles.length || !query) return;
   
-    const header = 'open_time,close_time,open,high,low,close,volume';
+    const header = 'symbol,open_time,close_time,open,high,low,close,volume';
     const rows = candles.map((c) => [
+      c.symbol,
       new Date(c.open_time.seconds * 1000).toISOString(),
       new Date(c.close_time.seconds * 1000).toISOString(),
       c.open,
@@ -102,7 +103,7 @@ function HistoricalCandlesPage() {
       c.close,
       c.volume,
     ].join(','));
-  
+    
     const content = [header, ...rows].join('\n');
   
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
@@ -132,52 +133,66 @@ function HistoricalCandlesPage() {
   }, [candles]);
 
   return (
-    <div>
-      <h2>Исторические свечи</h2>
-      <CandleForm onSubmit={handleQuery} loading={loading} />
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      {stats && (
-        <div className="summary-box">
-          <h4>Анализ текущей выборки</h4>
-          <div className="summary-grid">
-            <div className="summary-item">
-              <strong>Среднее закрытие</strong>
-              <span>{stats.closeAvg.toFixed(2)}</span>
-            </div>
-            <div className="summary-item">
-              <strong>Объём суммарно</strong>
-              <span>{stats.volSum.toFixed(2)}</span>
-            </div>
-            <div className="summary-item">
-              <strong>Изменение цены</strong>
-              <span>{stats.priceChange.toFixed(2)}</span>
-            </div>
-            <div className="summary-item">
-              <strong>Волатильность</strong>
-              <span>{stats.volatility.toFixed(2)}</span>
+    <div className="candles-layout">
+      <div className="candles-main">
+        <h2>Исторические свечи</h2>
+  
+        {stats && (
+          <div className="summary-box">
+            <h4>Анализ текущей выборки</h4>
+            <div className="summary-grid">
+              <div className="summary-item">
+                <strong>Среднее закрытие</strong>
+                <span>{stats.closeAvg.toFixed(2)}</span>
+              </div>
+              <div className="summary-item">
+                <strong>Объём суммарно</strong>
+                <span>{stats.volSum.toFixed(2)}</span>
+              </div>
+              <div className="summary-item">
+                <strong>Изменение цены</strong>
+                <span>{stats.priceChange.toFixed(2)}</span>
+              </div>
+              <div className="summary-item">
+                <strong>Волатильность</strong>
+                <span>{stats.volatility.toFixed(2)}</span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+  
+        {candles.length > 0 && (
+          <div style={{ margin: '1rem 0' }}>
+            <button onClick={handleExportCSV}>Скачать CSV</button>
+          </div>
+        )}
+  
+        {!loading && candles.length === 0 && query && <p>Нет данных по выбранным параметрам.</p>}
+        {candles.length > 0 && (
+          <div className="table-wrapper">
+            <CandleTable candles={candles} visibleCount={visibleCount} />
+          </div>
+        )}
 
-      {candles.length > 0 && (
-        <div style={{ margin: '1rem 0' }}>
-          <button onClick={handleExportCSV}>Скачать CSV</button>
-        </div>
-      )}
 
-      {!loading && candles.length === 0 && query && <p>Нет данных по выбранным параметрам.</p>}
-      {candles.length > 0 && (
-        <CandleTable candles={candles} visibleCount={visibleCount} />
-      )}
-      {candles.length < (query?.total || 0) && (
-        <button onClick={handleLoadMore} disabled={loading} style={{ marginTop: '1rem' }}>
+        {visibleCount < Math.min(candles.length, query?.total || 0) && (
+          <button
+            onClick={handleLoadMore}
+            disabled={loading}
+            className="load-more-button"
+          >
           Загрузить ещё
-        </button>
-      )}
+          </button>
+        )}
+
+      </div>
+  
+      <div className="candles-sidebar">
+        <CandleForm onSubmit={handleQuery} loading={loading} />
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+      </div>
     </div>
-  );
+  );  
 }
 
 function deduplicate(candles: Candle[] | undefined): Candle[] {
