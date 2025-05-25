@@ -91,6 +91,7 @@ function HistoricalCandlesPage() {
 
   const handleExportCSV = () => {
     if (!candles.length || !query) return;
+  
     const header = 'open_time,close_time,open,high,low,close,volume';
     const rows = candles.map((c) => [
       new Date(c.open_time.seconds * 1000).toISOString(),
@@ -101,27 +102,12 @@ function HistoricalCandlesPage() {
       c.close,
       c.volume,
     ].join(','));
-
-    const statsLines: string[] = [];
-    if (candles.length > 0) {
-      const closeAvg = candles.reduce((sum, c) => sum + c.close, 0) / candles.length;
-      const volSum = candles.reduce((sum, c) => sum + c.volume, 0);
-      const priceChange = candles[candles.length - 1].close - candles[0].open;
-      const maxHigh = Math.max(...candles.map((c) => c.high));
-      const minLow = Math.min(...candles.map((c) => c.low));
-      const volatility = maxHigh - minLow;
-
-      statsLines.push('', '# Анализ выборки:');
-      statsLines.push(`# Среднее закрытие: ${closeAvg.toFixed(2)}`);
-      statsLines.push(`# Суммарный объём: ${volSum.toFixed(2)}`);
-      statsLines.push(`# Изменение цены: ${priceChange.toFixed(2)}`);
-      statsLines.push(`# Волатильность: ${volatility.toFixed(2)}`);
-    }
-
-    const content = [header, ...rows, ...statsLines].join('');
+  
+    const content = [header, ...rows].join('\n');
+  
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-
+  
     const a = document.createElement('a');
     a.href = url;
     const now = new Date();
@@ -130,6 +116,7 @@ function HistoricalCandlesPage() {
     a.click();
     URL.revokeObjectURL(url);
   };
+  
 
 
   const stats = useMemo(() => {

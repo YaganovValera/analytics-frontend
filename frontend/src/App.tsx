@@ -6,6 +6,7 @@ import PrivateRoute from '@routes/PrivateRoute';
 import { useAuth } from '@context/AuthContext';
 import Header from '@components/Header';
 import HistoricalCandlesPage from '@pages/candles/HistoricalCandlesPage';
+import OfflineAnalysisPage from '@pages/analysis/OfflineAnalysisPage';
 
 function App() {
   const { initialized } = useAuth();
@@ -33,6 +34,10 @@ function App() {
               <HistoricalCandlesPage />
             </PrivateRoute>
           }
+        />
+        <Route
+          path="/analysis/offline"
+          element={<OfflineAnalysisPage />}
         />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

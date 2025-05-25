@@ -24,6 +24,17 @@ export interface Candle {
   volume: number;
 }
 
+export interface CSVParsedCandle {
+  symbol: string;
+  open_time: Date;
+  close_time: Date;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
 export interface Pagination {
   page_size: number;
   page_token?: string;
@@ -32,8 +43,8 @@ export interface Pagination {
 export interface CandleQuery {
   symbol: string;
   interval: Interval;
-  start: string; // ISO8601
-  end: string;   // ISO8601
+  start: string;
+  end: string;
   pagination: Pagination;
 }
 
