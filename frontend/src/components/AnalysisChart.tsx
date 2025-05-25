@@ -1,26 +1,27 @@
 // src/components/AnalysisChart.tsx
-import { useEffect, useRef } from 'react';
 import {
   createChart,
   type CandlestickData,
   type UTCTimestamp,
-  LineStyle,
   type IChartApi,
+  type SeriesMarkerPosition,
+  type SeriesMarkerShape,
 } from 'lightweight-charts';
+import { useEffect, useRef } from 'react';
 import type { Candle } from '../types/candle';
+import type { AnalyticsResponse } from '../types/analytics';
 import './AnalysisChart.css';
 
 interface Props {
   candles: Candle[];
-  highlights: {
-    maxGapUp: number;
-    maxGapDown: number;
-    mostVolatileCandle: Candle;
-    mostVolumeCandle: Candle;
-  };
+  analytics: AnalyticsResponse['analytics'];
 }
 
-function AnalysisChart({ candles, highlights }: Props) {
+function isValidTimestamp(value: any): value is UTCTimestamp {
+  return typeof value === 'number' && !isNaN(value) && value > 0;
+}
+
+function AnalysisChart({ candles, analytics }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chart = useRef<IChartApi | null>(null);
 
@@ -58,43 +59,48 @@ function AnalysisChart({ candles, highlights }: Props) {
 
     series.setData(data);
 
-    // GAP UP линия
-    const lineUp = instance.addLineSeries({
-      color: '#2e7d32', // зелёный
-      lineStyle: LineStyle.Dashed,
-      lineWidth: 1,
-    });
-    lineUp.setData(data.map(d => ({ time: d.time, value: d.open + highlights.maxGapUp })));
-
-    // GAP DOWN линия
-    const lineDown = instance.addLineSeries({
-      color: '#c62828', // красный
-      lineStyle: LineStyle.Dashed,
-      lineWidth: 1,
-    });
-    lineDown.setData(data.map(d => ({ time: d.time, value: d.open - highlights.maxGapDown })));
-
-    // Маркеры свечей
-    series.setMarkers([
+    const markers = [
       {
-        time: highlights.mostVolumeCandle.open_time.seconds as UTCTimestamp,
-        position: 'aboveBar',
+        candle: analytics.most_volume_candle,
+        position: 'aboveBar' as SeriesMarkerPosition,
         color: '#7e57c2',
-        shape: 'circle',
+        shape: 'circle' as SeriesMarkerShape,
         text: 'Max Vol',
       },
       {
-        time: highlights.mostVolatileCandle.open_time.seconds as UTCTimestamp,
-        position: 'belowBar',
+        candle: analytics.most_volatile_candle,
+        position: 'belowBar' as SeriesMarkerPosition,
         color: '#fbc02d',
-        shape: 'circle',
+        shape: 'circle' as SeriesMarkerShape,
         text: 'Volatile',
       },
-    ]);
-    
+      {
+        candle: analytics.max_gap_up_candle,
+        position: 'aboveBar' as SeriesMarkerPosition,
+        color: '#2e7d32',
+        shape: 'arrowUp' as SeriesMarkerShape,
+        text: '🔺',
+      },
+      {
+        candle: analytics.max_gap_down_candle,
+        position: 'belowBar' as SeriesMarkerPosition,
+        color: '#c62828',
+        shape: 'arrowDown' as SeriesMarkerShape,
+        text: '🔻',
+      },
+    ].filter(m => isValidTimestamp(m.candle?.open_time?.seconds)).map(m => ({
+      time: m.candle.open_time.seconds as UTCTimestamp,
+      position: m.position,
+      color: m.color,
+      shape: m.shape,
+      text: m.text,
+    }));
+
+    markers.sort((a, b) => a.time - b.time);
+    series.setMarkers(markers);
 
     return () => instance.remove();
-  }, [candles, highlights]);
+  }, [candles, analytics]);
 
   return (
     <div className="analysis-container">
