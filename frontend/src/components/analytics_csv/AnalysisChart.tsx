@@ -8,8 +8,8 @@ import {
   type SeriesMarkerShape,
 } from 'lightweight-charts';
 import { useEffect, useRef } from 'react';
-import type { Candle } from '../types/candle';
-import type { AnalyticsResponse } from '../types/analytics';
+import type { Candle } from '../../types/candle';
+import type { AnalyticsResponse } from '../../types/analytics';
 import './AnalysisChart.css';
 
 interface Props {

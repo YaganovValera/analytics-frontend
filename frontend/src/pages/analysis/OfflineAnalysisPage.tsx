@@ -1,10 +1,15 @@
 // src/pages/OfflineAnalysisPage.tsx
 import { useState } from 'react';
-import CsvUploader from '@components/CsvUploader';
+import CsvUploader from '@components/analytics_csv/CsvUploader';
 import api from '@api/axios';
-import AnalysisChart from '@components/AnalysisChart';
+import AnalysisChart from '@components/analytics_csv/AnalysisChart';
+
 import type { CSVParsedCandle, Candle } from '../../types/candle';
 import type { AnalyticsResponse } from '../../types/analytics';
+import MetricCards from '@components/analytics_csv/MetricCards';
+import VolumeByHourHistogram from '@components/analytics_csv/VolumeByHourHistogram';
+import BodyWickLineChart from '@components/analytics_csv/BodyWickLineChart';
+import PieChartUpDown from '@components/analytics_csv/PieChartUpDown';
 
 
 function OfflineAnalysisPage() {
@@ -96,6 +101,15 @@ function OfflineAnalysisPage() {
             candles={candles.map(toProtoCandle)}
             analytics={result.analytics}
           />
+
+          <MetricCards analytics={result.analytics} />
+          <VolumeByHourHistogram candles={candles.map(toProtoCandle)} />
+          <PieChartUpDown
+            upRatio={result.analytics.up_ratio}
+            downRatio={result.analytics.down_ratio}
+          />
+          <BodyWickLineChart analytics={result.analytics} />
+
         </div>
       )}
     </div>

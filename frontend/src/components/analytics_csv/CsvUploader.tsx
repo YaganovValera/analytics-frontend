@@ -1,7 +1,7 @@
 // src/components/CsvUploader.tsx
 import React from 'react';
 import Papa from 'papaparse';
-import type { CSVParsedCandle } from '../types/candle';
+import type { CSVParsedCandle } from '../../types/candle';
 import './CsvUploader.css';
 
 interface CsvUploaderProps {

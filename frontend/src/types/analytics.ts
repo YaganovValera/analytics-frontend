@@ -24,8 +24,6 @@ export interface AnalyticsResponse {
     bearish_streak: number;
     price_range_percent: number;
     dominant_hour: number;
-    pattern_summary: string;
-    summary: string;
     max_candle: Candle;
     min_candle: Candle;
     most_volatile_candle: Candle;
