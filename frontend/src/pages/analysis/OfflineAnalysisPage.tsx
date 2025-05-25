@@ -11,6 +11,7 @@ import BodyWickInsight from '@components/analytics_csv/BodyWickInsight';
 import MetricCards from '@components/analytics_csv/MetricCards';
 import VolumeByHourHistogram from '@components/analytics_csv/VolumeByHourHistogram';
 import PieChartUpDown from '@components/analytics_csv/PieChartUpDown';
+import MetricCommentary from '@components/analytics_csv/MetricCommentary';
 
 import './OfflineAnalysisPage.css';
 
@@ -105,6 +106,7 @@ function OfflineAnalysisPage() {
           />
 
           <MetricCards analytics={result.analytics} />
+          <MetricCommentary analytics={result.analytics} />
 
           <div className="grid-two-cols">
             <VolumeByHourHistogram candles={candles.map(toProtoCandle)} />

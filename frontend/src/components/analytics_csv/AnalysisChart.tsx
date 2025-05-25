@@ -31,7 +31,7 @@ function AnalysisChart({ candles, analytics }: Props) {
     chartRef.current.innerHTML = '';
 
     const instance = createChart(chartRef.current, {
-      width: chartRef.current.clientWidth,
+      width: chartRef.current.clientWidth - 100,
       height: 400,
       layout: {
         background: { color: '#fff' },

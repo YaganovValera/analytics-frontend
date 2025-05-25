@@ -18,7 +18,7 @@ function PieChartUpDown({ upRatio, downRatio }: Props) {
 
   return (
     <div className="pie-chart-block">
-      <h3>🥧 Соотношение свечей роста и падения</h3>
+      <h3> Соотношение свечей роста и падения</h3>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
