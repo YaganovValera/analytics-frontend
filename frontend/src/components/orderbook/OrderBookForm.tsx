@@ -8,7 +8,7 @@ interface OrderBookFormProps {
     symbol: string;
     start: string;
     end: string;
-    limit: number;
+    pageSize: number;
   }) => void;
   loading: boolean;
 }
@@ -18,7 +18,7 @@ function OrderBookForm({ onSubmit, loading }: OrderBookFormProps) {
   const [symbol, setSymbol] = useState('');
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
-  const [limit, setLimit] = useState(500);
+  const [pageSize, setPageSize] = useState(100);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,20 +29,37 @@ function OrderBookForm({ onSubmit, loading }: OrderBookFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!symbol || !start || !end || !limit) return setError('Заполните все поля');
-    if (new Date(start) >= new Date(end)) return setError('Дата начала должна быть меньше даты окончания');
-    if (limit < 1 || limit > 1000) return setError('Количество записей должно быть от 1 до 1000');
+
+    if (!symbol || !start || !end || !pageSize) {
+      return setError('Пожалуйста, заполните все поля');
+    }
+
+    const startTime = new Date(start);
+    const endTime = new Date(end);
+    if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+      return setError('Неверный формат даты');
+    }
+
+    if (startTime >= endTime) {
+      return setError('Дата начала должна быть раньше даты окончания');
+    }
+
+    if (pageSize < 1 || pageSize > 250) {
+      return setError('Количество снимков должно быть от 1 до 250');
+    }
+
     setError(null);
+
     onSubmit({
       symbol,
-      start: new Date(start).toISOString(),
-      end: new Date(end).toISOString(),
-      limit,
+      start: startTime.toISOString(),
+      end: endTime.toISOString(),
+      pageSize,
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="orderbook-form">
+    <form className="orderbook-form" onSubmit={handleSubmit}>
       <h3>Фильтрация данных</h3>
       {error && <div className="form-error">{error}</div>}
 
@@ -64,7 +81,6 @@ function OrderBookForm({ onSubmit, loading }: OrderBookFormProps) {
       <div className="form-group">
         <label className="form-label">Начало:</label>
         <input
-          className="form-input"
           type="datetime-local"
           value={start}
           onChange={(e) => setStart(e.target.value)}
@@ -75,7 +91,6 @@ function OrderBookForm({ onSubmit, loading }: OrderBookFormProps) {
       <div className="form-group">
         <label className="form-label">Конец:</label>
         <input
-          className="form-input"
           type="datetime-local"
           value={end}
           onChange={(e) => setEnd(e.target.value)}
@@ -84,20 +99,19 @@ function OrderBookForm({ onSubmit, loading }: OrderBookFormProps) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Количество снимков (1–1000):</label>
+        <label className="form-label">Количество снимков (1–250):</label>
         <input
-          className="form-input"
           type="number"
-          value={limit}
-          onChange={(e) => setLimit(parseInt(e.target.value))}
+          value={pageSize}
+          onChange={(e) => setPageSize(parseInt(e.target.value))}
           min={1}
-          max={1000}
+          max={250}
           required
         />
       </div>
 
       <button type="submit" disabled={loading}>
-        Загрузить
+        {loading ? 'Загрузка...' : 'Загрузить'}
       </button>
     </form>
   );
