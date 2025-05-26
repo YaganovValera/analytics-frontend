@@ -18,9 +18,10 @@ function Header() {
         {user?.roles.includes('admin') && <Link to="/admin">Админка</Link>}
         <Link to="/candles/historical">Аналитика</Link>
         <Link to="/analysis/offline">Анализ csv файлов</Link>
+        <Link to="/orderbook/historical">Orderbook</Link>
       </nav>
       <div className="user-info">
-        <span>👤 {user?.user_id}</span>
+        <span>👤 {user?.roles}</span>
         <button className="logout-button" onClick={handleLogout}>Выйти</button>
       </div>
     </header>

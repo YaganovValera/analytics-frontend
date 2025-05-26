@@ -1,8 +1,8 @@
 // src/pages/candles/HistoricalCandlesPage.tsx
 
 import { useState, useMemo } from 'react';
-import CandleForm from '@components/CandleForm';
-import CandleTable from '@components/CandleTable';
+import CandleForm from '@components/candle/CandleForm';
+import CandleTable from '@components/candle/CandleTable';
 import { fetchCandles } from '@api/candles';
 import type { Interval, Candle } from '../../types/candle';
 import './HistoricalCandlesPage.css';

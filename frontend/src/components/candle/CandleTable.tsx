@@ -1,7 +1,7 @@
 // src/components/CandleTable.tsx
 
 import { useMemo, useState } from 'react';
-import type { Candle } from '../types/candle';
+import type { Candle } from '../../types/candle';
 import './CandleTable.css';
 
 interface CandleTableProps {

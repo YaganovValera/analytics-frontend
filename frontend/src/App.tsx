@@ -7,6 +7,8 @@ import { useAuth } from '@context/AuthContext';
 import Header from '@components/Header';
 import HistoricalCandlesPage from '@pages/candles/HistoricalCandlesPage';
 import OfflineAnalysisPage from '@pages/analysis/OfflineAnalysisPage';
+import OrderBookPage from '@pages/orderbook/OrderBookPage';
+
 
 function App() {
   const { initialized } = useAuth();
@@ -37,7 +39,17 @@ function App() {
         />
         <Route
           path="/analysis/offline"
-          element={<OfflineAnalysisPage />}
+          element={
+            <PrivateRoute>
+              <OfflineAnalysisPage />
+            </PrivateRoute>}
+        />
+        <Route
+          path="/orderbook/historical"
+          element={
+            <PrivateRoute>
+              <OrderBookPage />
+            </PrivateRoute>}
         />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

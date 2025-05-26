@@ -1,30 +1,24 @@
-// src/components/CandleForm.tsx
-
-import React, { useState, useEffect } from 'react';
+// src/components/orderbook/OrderBookForm.tsx
+import { useEffect, useState } from 'react';
 import { fetchSymbols } from '@api/candles';
-import type { Interval } from '../types/candle';
-import './CandleForm.css';
+import './OrderBookForm.css';
 
-interface CandleFormProps {
+interface OrderBookFormProps {
   onSubmit: (params: {
     symbol: string;
-    interval: Interval;
     start: string;
     end: string;
-    total: number;
+    limit: number;
   }) => void;
   loading: boolean;
 }
 
-const intervals: Interval[] = ['1m', '5m', '15m', '1h', '4h', '1d'];
-
-function CandleForm({ onSubmit, loading }: CandleFormProps) {
+function OrderBookForm({ onSubmit, loading }: OrderBookFormProps) {
   const [symbols, setSymbols] = useState<string[]>([]);
   const [symbol, setSymbol] = useState('');
-  const [interval, setInterval] = useState<Interval>('1h');
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
-  const [total, setTotal] = useState(500);
+  const [limit, setLimit] = useState(500);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,21 +29,20 @@ function CandleForm({ onSubmit, loading }: CandleFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!symbol || !start || !end || !total) return setError('Заполните все поля');
+    if (!symbol || !start || !end || !limit) return setError('Заполните все поля');
     if (new Date(start) >= new Date(end)) return setError('Дата начала должна быть меньше даты окончания');
-    if (total < 1 || total > 2000) return setError('Количество записей должно быть от 1 до 2000');
+    if (limit < 1 || limit > 1000) return setError('Количество записей должно быть от 1 до 1000');
     setError(null);
     onSubmit({
       symbol,
-      interval,
       start: new Date(start).toISOString(),
       end: new Date(end).toISOString(),
-      total,
+      limit,
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="candle-form">
+    <form onSubmit={handleSubmit} className="orderbook-form">
       <h3>Фильтрация данных</h3>
       {error && <div className="form-error">{error}</div>}
 
@@ -64,19 +57,6 @@ function CandleForm({ onSubmit, loading }: CandleFormProps) {
           <option value="">-- выберите --</option>
           {symbols.map((s) => (
             <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="form-group">
-        <label className="form-label">Интервал:</label>
-        <select
-          className="form-select"
-          value={interval}
-          onChange={(e) => setInterval(e.target.value as Interval)}
-        >
-          {intervals.map((intv) => (
-            <option key={intv} value={intv}>{intv}</option>
           ))}
         </select>
       </div>
@@ -104,14 +84,14 @@ function CandleForm({ onSubmit, loading }: CandleFormProps) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Количество свечей (1–2000):</label>
+        <label className="form-label">Количество снимков (1–1000):</label>
         <input
           className="form-input"
           type="number"
-          value={total}
-          onChange={(e) => setTotal(parseInt(e.target.value))}
+          value={limit}
+          onChange={(e) => setLimit(parseInt(e.target.value))}
           min={1}
-          max={2000}
+          max={1000}
           required
         />
       </div>
@@ -123,4 +103,4 @@ function CandleForm({ onSubmit, loading }: CandleFormProps) {
   );
 }
 
-export default CandleForm;
+export default OrderBookForm;
