@@ -1,68 +1,69 @@
-/* src/components/CandleForm.css */
-
-.candle-form-container {
+.orderbook-form {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.candle-form {
-  min-width: 250px;
-  max-width: 300px;
-  background: #f9f9f9;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-family: Arial, sans-serif;
-}
-
-.candle-form h3 {
-  margin-top: 0;
-  font-size: 1.1rem;
-  color: #333;
+.orderbook-form h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #212529;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 8px;
 }
 
 .form-group {
-  margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
 .form-label {
-  font-weight: bold;
-  margin-bottom: 0.3rem;
-  font-size: 0.9rem;
+  font-size: 14px;
+  color: #495057;
 }
 
-.form-input,
-.form-select {
-  padding: 0.4rem 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.9rem;
+.form-select,
+.orderbook-form input[type="datetime-local"],
+.orderbook-form input[type="number"] {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+.orderbook-form button[type="submit"] {
+  margin-top: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.orderbook-form button[type="submit"]:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.orderbook-form button[type="submit"]:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
 }
 
 .form-error {
-  color: red;
-  margin-bottom: 1rem;
-  font-size: 0.85rem;
-}
-
-button[type="submit"] {
-  padding: 0.5rem 1rem;
-  background-color: #0077cc;
-  border: none;
-  color: white;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-button[type="submit"]:disabled {
-  background-color: #a0a0a0;
-  cursor: not-allowed;
+  background-color: #ffe3e3;
+  color: #c92a2a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
 }

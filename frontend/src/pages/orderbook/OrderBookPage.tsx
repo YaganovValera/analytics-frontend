@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import './OrderBookPage.css';
 import OrderBookForm from '@components/orderbook/OrderBookForm';
 import OrderBookMetrics from '@components/orderbook/OrderBookMetrics';
 import OrderBookSpreadChart from '@components/orderbook/OrderBookSpreadChart';
 import OrderBookDepthChart from '@components/orderbook/OrderBookDepthChart';
 import OrderBookLevelTable from '@components/orderbook/OrderBookLevelTable';
+import OrderBookAnimator from '@components/orderbook/OrderBookAnimator';
 import { fetchOrderBook } from '@api/orderbook';
 import type { OrderBookSnapshot, OrderBookAnalysis } from '../../types/orderbook';
+import OrderBookSummary from '@components/orderbook/OrderBookSummary';
 
 function OrderBookPage() {
   const [analysis, setAnalysis] = useState<OrderBookAnalysis | null>(null);
@@ -88,17 +91,18 @@ function OrderBookPage() {
 
   return (
     <div className="orderbook-layout">
-      <div className="orderbook-sidebar">
-        <OrderBookForm onSubmit={handleQuery} loading={loading} />
+      <div className="orderbook-content">
         {error && <p style={{ color: 'red' }}>{error}</p>}
         {noData && <p>Нет данных в выбранном диапазоне</p>}
         {analysis && <OrderBookMetrics analysis={analysis} />}
+        {analysis && <OrderBookSummary analysis={analysis} />}
         {snapshots.length > 0 && (
           <>
             <OrderBookSpreadChart snapshots={snapshots} />
             <OrderBookDepthChart snapshot={snapshots[0]} />
             <OrderBookLevelTable snapshot={snapshots[0]} />
-            <div style={{ marginTop: '16px', textAlign: 'center', display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <OrderBookAnimator snapshots={snapshots} />
+            <div className="orderbook-pagination">
               <button onClick={handleLoadPrev} disabled={loading || pageIndex === 0}>
                 ← Предыдущие
               </button>
@@ -110,6 +114,9 @@ function OrderBookPage() {
             </div>
           </>
         )}
+      </div>
+      <div className="orderbook-sidebar">
+        <OrderBookForm onSubmit={handleQuery} loading={loading} />
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
- /* src/components/MetricCards.css */
 .metric-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -13,6 +12,12 @@
   text-align: center;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px; /* 👈 гарантирует стабильную высоту */
+  box-sizing: border-box;
 }
 
 .metric-card:hover {
@@ -26,12 +31,14 @@
 }
 
 .metric-value {
-  font-size: 1.25rem;
+  font-size: 1.4rem;
   font-weight: bold;
-  color: #333;
+  color: #212529;
+  margin-bottom: 4px;
 }
 
 .metric-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #555;
+  line-height: 1.2;
 }
