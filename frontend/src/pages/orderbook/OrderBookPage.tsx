@@ -3,22 +3,18 @@ import './OrderBookPage.css';
 import OrderBookForm from '@components/orderbook/OrderBookForm';
 import OrderBookMetrics from '@components/orderbook/OrderBookMetrics';
 import OrderBookSpreadChart from '@components/orderbook/OrderBookSpreadChart';
+import OrderBookSpreadExplanation from '@components/orderbook/OrderBookSpreadExplanation';
 import OrderBookDepthChart from '@components/orderbook/OrderBookDepthChart';
 import OrderBookLevelTable from '@components/orderbook/OrderBookLevelTable';
 import OrderBookAnimator from '@components/orderbook/OrderBookAnimator';
+import OrderBookSummary from '@components/orderbook/OrderBookSummary';
 import { fetchOrderBook } from '@api/orderbook';
 import type { OrderBookSnapshot, OrderBookAnalysis } from '../../types/orderbook';
-import OrderBookSummary from '@components/orderbook/OrderBookSummary';
 
 function OrderBookPage() {
   const [analysis, setAnalysis] = useState<OrderBookAnalysis | null>(null);
   const [snapshots, setSnapshots] = useState<OrderBookSnapshot[]>([]);
-  const [query, setQuery] = useState<{
-    symbol: string;
-    start: string;
-    end: string;
-    pageSize: number;
-  } | null>(null);
+  const [query, setQuery] = useState<{ symbol: string; start: string; end: string; pageSize: number } | null>(null);
   const [pageTokens, setPageTokens] = useState<string[]>(['']);
   const [pageIndex, setPageIndex] = useState(0);
   const [nextToken, setNextToken] = useState<string | undefined>(undefined);
@@ -26,12 +22,7 @@ function OrderBookPage() {
   const [error, setError] = useState<string | null>(null);
   const [noData, setNoData] = useState(false);
 
-  const handleQuery = async (params: {
-    symbol: string;
-    start: string;
-    end: string;
-    pageSize: number;
-  }) => {
+  const handleQuery = async (params: { symbol: string; start: string; end: string; pageSize: number }) => {
     setError(null);
     setLoading(true);
     setNoData(false);
@@ -44,9 +35,7 @@ function OrderBookPage() {
       setAnalysis(res.analysis);
       setSnapshots(snaps);
       setNextToken(res.next_page_token);
-      if (snaps.length === 0) {
-        setNoData(true);
-      }
+      if (snaps.length === 0) setNoData(true);
     } catch {
       setError('Ошибка загрузки данных');
       setSnapshots([]);
@@ -84,28 +73,39 @@ function OrderBookPage() {
   };
 
   const handleLoadPrev = async () => {
-    if (pageIndex > 0) {
-      await loadPage(pageIndex - 1);
-    }
+    if (pageIndex > 0) await loadPage(pageIndex - 1);
   };
 
   return (
     <div className="orderbook-layout">
-      <div className="orderbook-content">
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {noData && <p>Нет данных в выбранном диапазоне</p>}
-        {analysis && <OrderBookMetrics analysis={analysis} />}
-        {analysis && <OrderBookSummary analysis={analysis} />}
+      <div className="orderbook-main">
+        {error && <p className="error-text">{error}</p>}
+        {noData && <p className="info-text">Нет данных в выбранном диапазоне</p>}
+
+        {analysis && (
+          <>
+            <OrderBookMetrics analysis={analysis} />
+            <OrderBookSummary analysis={analysis} />
+          </>
+        )}
+
         {snapshots.length > 0 && (
           <>
-            <OrderBookSpreadChart snapshots={snapshots} />
+            <div className="chart-analysis-block">
+              <div className="chart-block">
+                <OrderBookSpreadChart snapshots={snapshots} />
+              </div>
+              <div className="explanation-block">
+                <OrderBookSpreadExplanation/>
+              </div>
+            </div>
+
             <OrderBookDepthChart snapshot={snapshots[0]} />
             <OrderBookLevelTable snapshot={snapshots[0]} />
             <OrderBookAnimator snapshots={snapshots} />
+
             <div className="orderbook-pagination">
-              <button onClick={handleLoadPrev} disabled={loading || pageIndex === 0}>
-                ← Предыдущие
-              </button>
+              <button onClick={handleLoadPrev} disabled={loading || pageIndex === 0}>← Предыдущие</button>
               {nextToken && (
                 <button onClick={handleLoadNext} disabled={loading}>
                   {loading ? 'Загрузка...' : 'Следующие →'}
@@ -115,6 +115,7 @@ function OrderBookPage() {
           </>
         )}
       </div>
+
       <div className="orderbook-sidebar">
         <OrderBookForm onSubmit={handleQuery} loading={loading} />
       </div>

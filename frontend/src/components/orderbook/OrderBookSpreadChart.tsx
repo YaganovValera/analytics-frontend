@@ -6,7 +6,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   CartesianGrid,
   Brush,
@@ -43,24 +42,17 @@ function OrderBookSpreadChart({ snapshots }: Props) {
         <p>Обрабатывается {snapshots.length} снимков стакана</p>
       </div>
       <ResponsiveContainer width="100%" height={420}>
-        <LineChart data={data} margin={{ top: 20, right: 80, left: 10, bottom: 20 }}>
+        <LineChart data={data} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" height={50} />
           <YAxis yAxisId="left" domain={[0, 'auto']} tickFormatter={(v) => v + '%'} />
           <YAxis yAxisId="right" orientation="right" domain={[-1, 1]} />
+
           <Tooltip
             formatter={(value: number, name: string) => [value.toFixed(4), name === 'spread' ? 'Спред (%)' : 'Дисбаланс']}
             labelFormatter={(label) => `Время: ${label}`}
           />
-          <Legend
-            verticalAlign="top"
-            align="right"
-            wrapperStyle={{ top: 0, right: 0 }}
-            payload={[
-              { id: 'spread', value: 'Спред (%) — разница между ask и bid', type: 'line', color: '#005eff' },
-              { id: 'imbalance', value: 'Дисбаланс — преобладание bid/ask объёмов', type: 'line', color: '#eb4034' },
-            ]}
-          />
+
           <Line
             yAxisId="left"
             type="monotone"
@@ -78,8 +70,27 @@ function OrderBookSpreadChart({ snapshots }: Props) {
             dot={false}
           />
 
-          <ReferenceDot x={maxSpread.time} y={maxSpread.spread} yAxisId="left" r={5} fill="#005eff" stroke="none" label={{ value: 'макс. спред', position: 'top', fontSize: 10 }} />
-          <ReferenceDot x={minImbalance.time} y={minImbalance.imbalance} yAxisId="right" r={5} fill="#eb4034" stroke="none" label={{ value: 'мин. дисбаланс', position: 'bottom', fontSize: 10 }} />
+          <ReferenceDot
+            x={maxSpread.time}
+            y={maxSpread.spread}
+            yAxisId="left"
+            r={6}
+            fill="#005eff"
+            stroke="#0033cc"
+            strokeWidth={1.5}
+            label={{ value: 'макс. спред', position: 'top', fontSize: 10 }}
+          />
+
+          <ReferenceDot
+            x={minImbalance.time}
+            y={minImbalance.imbalance}
+            yAxisId="right"
+            r={6}
+            fill="#eb4034"
+            stroke="#a11c1c"
+            strokeWidth={1.5}
+            label={{ value: 'мин. дисбаланс', position: 'bottom', fontSize: 10 }}
+          />
 
           <Brush dataKey="time" height={20} stroke="#8884d8" />
         </LineChart>
