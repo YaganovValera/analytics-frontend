@@ -13,7 +13,7 @@ function OrderBookLevelTable({ snapshot }: Props) {
   return (
     <div className="orderbook-table">
       <div className="orderbook-table-header">
-        <h3>Таблица заявок (первый снимок)</h3>
+        <h3>Таблица заявок </h3>
       </div>
       <table>
         <thead>

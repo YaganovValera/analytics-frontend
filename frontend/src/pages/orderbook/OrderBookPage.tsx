@@ -4,12 +4,11 @@ import OrderBookForm from '@components/orderbook/OrderBookForm';
 import OrderBookMetrics from '@components/orderbook/OrderBookMetrics';
 import OrderBookSpreadChart from '@components/orderbook/OrderBookSpreadChart';
 import OrderBookSpreadExplanation from '@components/orderbook/OrderBookSpreadExplanation';
-import OrderBookDepthChart from '@components/orderbook/OrderBookDepthChart';
-import OrderBookLevelTable from '@components/orderbook/OrderBookLevelTable';
 import OrderBookAnimator from '@components/orderbook/OrderBookAnimator';
 import OrderBookSummary from '@components/orderbook/OrderBookSummary';
 import { fetchOrderBook } from '@api/orderbook';
 import type { OrderBookSnapshot, OrderBookAnalysis } from '../../types/orderbook';
+import OrderBookAnimatorExplanation from '@components/orderbook/OrderBookAnimatorExplanation';
 
 function OrderBookPage() {
   const [analysis, setAnalysis] = useState<OrderBookAnalysis | null>(null);
@@ -100,10 +99,8 @@ function OrderBookPage() {
               </div>
             </div>
 
-            <OrderBookDepthChart snapshot={snapshots[0]} />
-            <OrderBookLevelTable snapshot={snapshots[0]} />
             <OrderBookAnimator snapshots={snapshots} />
-
+            <OrderBookAnimatorExplanation />
             <div className="orderbook-pagination">
               <button onClick={handleLoadPrev} disabled={loading || pageIndex === 0}>← Предыдущие</button>
               {nextToken && (

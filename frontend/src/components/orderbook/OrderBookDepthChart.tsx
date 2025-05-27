@@ -8,14 +8,18 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from 'recharts';
 
 interface Props {
-  snapshot: OrderBookSnapshot;
+  snapshots: OrderBookSnapshot[];
+  index: number;
+  setIndex: (i: number) => void;
 }
 
-function OrderBookDepthChart({ snapshot }: Props) {
+function OrderBookDepthChart({ snapshots, index, setIndex }: Props) {
+  if (!snapshots || snapshots.length === 0 || !snapshots[index]) return null;
+
+  const snapshot = snapshots[index];
   const bids = [...(snapshot.bids ?? [])].sort((a, b) => b.price - a.price);
   const asks = [...(snapshot.asks ?? [])].sort((a, b) => a.price - b.price);
 
@@ -33,27 +37,41 @@ function OrderBookDepthChart({ snapshot }: Props) {
   }
 
   const sortedData = data.sort((a, b) => a.price - b.price);
+  const timestamp = new Date(snapshot.timestamp.seconds * 1000)
+  .toLocaleString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
 
   return (
     <div className="depth-chart">
       <div className="depth-chart-header">
-        <h3>Глубина стакана (по первому снимку)</h3>
-        <p>Показано {bids.length} bid и {asks.length} ask уровней</p>
+        <h3>Глубина стакана</h3>
+        <p>Кадр {index + 1} из {snapshots.length} • Время: {timestamp}</p>
       </div>
+
+      <input
+        type="range"
+        min={0}
+        max={snapshots.length - 1}
+        value={index}
+        onChange={(e) => setIndex(Number(e.target.value))}
+        className="depth-slider"
+      />
+
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={sortedData} margin={{ top: 20, right: 40, left: 10, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="price" tick={{ fontSize: 10 }} type="number" domain={['auto', 'auto']} />
           <YAxis tick={{ fontSize: 10 }} />
-          <Tooltip formatter={(val: number) => val.toFixed(4)} labelFormatter={(label) => `Цена: ${label}`}/>
-          <Legend
-            verticalAlign="top"
-            align="right"
-            wrapperStyle={{ top: 0, right: 0 }}
-            payload={[
-              { id: 'bid', value: 'Bid накопленный объём', type: 'line', color: '#007bff' },
-              { id: 'ask', value: 'Ask накопленный объём', type: 'line', color: '#dc3545' },
-            ]}
+          <Tooltip
+            formatter={(val: number) => val.toFixed(4)}
+            labelFormatter={(label) => `Цена: ${label}`}
           />
           <Line type="stepAfter" dataKey="bid" stroke="#007bff" strokeWidth={2} dot={false} />
           <Line type="stepAfter" dataKey="ask" stroke="#dc3545" strokeWidth={2} dot={false} />
