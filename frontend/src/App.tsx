@@ -8,6 +8,7 @@ import Header from '@components/Header';
 import HistoricalCandlesPage from '@pages/candles/HistoricalCandlesPage';
 import OfflineAnalysisPage from '@pages/analysis/OfflineAnalysisPage';
 import OrderBookPage from '@pages/orderbook/OrderBookPage';
+import AdminDashboardPage from '@pages/admin/AdminDashboardPage';
 
 
 function App() {
@@ -50,6 +51,14 @@ function App() {
             <PrivateRoute>
               <OrderBookPage />
             </PrivateRoute>}
+        />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <AdminDashboardPage />
+            </PrivateRoute>
+          }
         />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

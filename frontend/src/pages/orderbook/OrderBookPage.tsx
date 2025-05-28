@@ -65,11 +65,26 @@ function OrderBookPage() {
 
   const handleLoadNext = async () => {
     if (!query || !nextToken) return;
-    const newTokens = [...pageTokens];
-    newTokens[pageIndex + 1] = nextToken;
-    setPageTokens(newTokens);
-    await loadPage(pageIndex + 1);
+    try {
+      setLoading(true);
+      const res = await fetchOrderBook({ ...query, pageToken: nextToken });
+      const snaps = res.snapshots ?? [];
+      setSnapshots(snaps);
+      setAnalysis(res.analysis);
+      setNoData(snaps.length === 0);
+  
+      const newTokens = [...pageTokens];
+      newTokens[pageIndex + 1] = nextToken;
+      setPageTokens(newTokens);
+      setPageIndex(pageIndex + 1);
+      setNextToken(res.next_page_token);
+    } catch {
+      setError('Ошибка при загрузке следующей страницы');
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   const handleLoadPrev = async () => {
     if (pageIndex > 0) await loadPage(pageIndex - 1);
